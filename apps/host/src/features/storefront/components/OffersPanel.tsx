@@ -1,4 +1,5 @@
 import type { Offer } from '../../../shared/types/store';
+import { GridSkeleton } from '../../../shared/components/AppLoaders';
 
 interface OffersPanelProps {
   offers: Offer[];
@@ -23,7 +24,7 @@ export function OffersPanel({
       </div>
 
       {isLoading ? (
-        <div className="empty-results">Loading offers...</div>
+        <GridSkeleton count={3} minHeight={170} />
       ) : (
         <div className="offer-grid">
           {offers.map((offer) => {

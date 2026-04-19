@@ -1,5 +1,21 @@
 import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTheme } from '@mui/material/styles';
+import {
+  Avatar,
+  Box,
+  Button,
+  Divider,
+  Drawer,
+  IconButton,
+  List,
+  ListItemButton,
+  ListItemText,
+  Paper,
+  Stack,
+  Typography,
+} from '@mui/material';
+import { useColorMode } from '../../../app/providers';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { getCustomerProfile, getMe, loginUser, registerUser } from '../../auth/api/authApi';
 import { AuthPage } from '../../auth/pages/AuthPage';
@@ -25,6 +41,7 @@ import { CatalogPage } from '../pages/CatalogPage';
 import { CheckoutPage } from '../pages/CheckoutPage';
 import { HomePage } from '../pages/HomePage';
 import { OffersPage } from '../pages/OffersPage';
+import { PanelLoader, StatCardsSkeleton } from '../../../shared/components/AppLoaders';
 
 const CustomerPanel = lazy(() => import('customer/CustomerPanel'));
 const MiniCart = lazy(() => import('cart/MiniCart'));
@@ -35,15 +52,16 @@ interface NavItem {
   label: string;
   path: StorefrontRoute;
   requiresAuth?: boolean;
+  glyph: string;
 }
 
 const navItems: NavItem[] = [
-  { label: 'Home', path: '/', requiresAuth: true },
-  { label: 'Catalog', path: '/catalog', requiresAuth: true },
-  { label: 'Offers', path: '/offers', requiresAuth: true },
-  { label: 'Checkout', path: '/checkout', requiresAuth: true },
-  { label: 'Account', path: '/account', requiresAuth: true },
-  { label: 'Auth', path: '/auth' },
+  { label: 'Home', path: '/', requiresAuth: true, glyph: 'H' },
+  { label: 'Catalog', path: '/catalog', requiresAuth: true, glyph: 'C' },
+  { label: 'Offers', path: '/offers', requiresAuth: true, glyph: 'O' },
+  { label: 'Checkout', path: '/checkout', requiresAuth: true, glyph: 'K' },
+  { label: 'Account', path: '/account', requiresAuth: true, glyph: 'A' },
+  { label: 'Auth', path: '/auth', glyph: 'U' },
 ];
 
 function normalizeRoute(pathname: string): StorefrontRoute {
@@ -62,6 +80,8 @@ function normalizeRoute(pathname: string): StorefrontRoute {
 }
 
 export function StorefrontPage() {
+  const theme = useTheme();
+  const { mode, toggleMode } = useColorMode();
   const dispatch = useAppDispatch();
   const auth = useAppSelector((state) => state.auth);
   const customer = useAppSelector((state) => state.customer.currentCustomer);
@@ -71,6 +91,7 @@ export function StorefrontPage() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [currentRoute, setCurrentRoute] = useState<StorefrontRoute>(() =>
     normalizeRoute(window.location.pathname),
   );
@@ -139,7 +160,6 @@ export function StorefrontPage() {
 
   useEffect(() => {
     const handlePopState = () => setCurrentRoute(normalizeRoute(window.location.pathname));
-
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
@@ -164,10 +184,8 @@ export function StorefrontPage() {
 
   const filteredProducts = useMemo(() => {
     const normalizedSearch = searchTerm.toLowerCase().trim();
-
     return products.filter((product) => {
-      const categoryMatch =
-        selectedCategory === 'All' || product.category === selectedCategory;
+      const categoryMatch = selectedCategory === 'All' || product.category === selectedCategory;
       const searchMatch =
         normalizedSearch.length === 0 ||
         product.name.toLowerCase().includes(normalizedSearch) ||
@@ -179,7 +197,7 @@ export function StorefrontPage() {
 
   const activeOffer = offers.find((offer) => offer.code === appliedCouponCode) ?? null;
   const totalItemCount = cartItems.reduce((count, item) => count + item.quantity, 0);
-  const subtotal = cartItems.reduce((total, item) => total + item.quantity * item.price, 0);
+  const subtotal = cartItems.reduce((sum, item) => sum + item.quantity * item.price, 0);
   const discount = activeOffer ? Math.round((subtotal * activeOffer.discountPercent) / 100) : 0;
   const discountedSubtotal = Math.max(subtotal - discount, 0);
   const shipping =
@@ -213,140 +231,252 @@ export function StorefrontPage() {
   };
 
   const customerCard = (
-    <Suspense fallback={<div className="panel">Loading customer account...</div>}>
+    <Suspense fallback={<PanelLoader label="Loading customer account..." minHeight={220} />}>
       <CustomerPanel customer={customer} authToken={auth.token} />
     </Suspense>
   );
 
-  const visibleNavItems = navItems.filter((item) => (isAuthenticated ? item.path !== '/auth' : item.path === '/auth'));
+  const visibleNavItems = navItems.filter((item) =>
+    isAuthenticated ? item.path !== '/auth' : item.path === '/auth',
+  );
+
+  const onNavigate = (path: StorefrontRoute) => {
+    navigate(path);
+    setIsMobileNavOpen(false);
+  };
+
+  const currentNavLabel = visibleNavItems.find((item) => item.path === currentRoute)?.label ?? 'Home';
+
+  const sidebarNavigation = (
+    <Box sx={{ width: '100%', boxSizing: 'border-box', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <Box sx={{ px: 2, display: 'flex', alignItems: 'center', gap: 1, height: 72, flexShrink: 0, borderBottom: `1px solid ${theme.palette.divider}` }}>
+        <Typography variant="h6" sx={{ fontWeight: 800, fontSize: 16 }}>
+          Module Federation poc
+        </Typography>
+      </Box>
+
+      <Typography sx={{ px: 2, pt: 1.5, pb: 1, color: 'text.secondary', fontSize: 12, letterSpacing: 0.6, flexShrink: 0 }}>
+        MENU
+      </Typography>
+
+      <List sx={{ px: 1, py: 0, overflowY: 'auto', flex: 1, minHeight: 0 }}>
+        {visibleNavItems.map((item) => (
+          <ListItemButton
+            key={item.path}
+            selected={item.path === currentRoute}
+            onClick={() => onNavigate(item.path)}
+            sx={{
+              mb: 0.6,
+              borderRadius: 1.2,
+              py: 1,
+              '&.Mui-selected': {
+                bgcolor: '#233d70',
+                color: '#fff',
+                '&:hover': { bgcolor: '#1c335e' },
+              },
+            }}
+          >
+            <Typography sx={{ mr: 1.2, opacity: 0.8, fontSize: 14 }}>{item.glyph}</Typography>
+            <ListItemText primary={item.label} />
+          </ListItemButton>
+        ))}
+      </List>
+
+      <Box sx={{ mt: 'auto', px: 2, pb: 2, flexShrink: 0 }}>
+        <Divider sx={{ mb: 2 }} />
+        {isAuthenticated ? (
+          <Paper
+            variant="outlined"
+            sx={{ p: 1.1, borderRadius: 1.5, display: 'flex', alignItems: 'center', gap: 1.1, bgcolor: 'action.hover' }}
+          >
+            <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main', fontSize: 14 }}>
+              {auth.user?.name?.[0]?.toUpperCase() ?? 'U'}
+            </Avatar>
+            <Box>
+              <Typography sx={{ fontWeight: 700, fontSize: 14 }}>{auth.user?.name ?? 'User'}</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {totalItemCount} items in cart
+              </Typography>
+            </Box>
+          </Paper>
+        ) : null}
+      </Box>
+    </Box>
+  );
 
   return (
-    <main className="storefront-shell">
-      <header className="hero-banner">
-        <div>
-          <p className="eyebrow">NovaStore Commerce</p>
-          <h1>Multi-page ecommerce storefront</h1>
-          <p className="hero-copy">
-            Auth-enabled storefront with Node + Express + MongoDB backend APIs.
-          </p>
-        </div>
-
-        <div className="hero-stats">
-          <article className="summary-card">
-            <span>Featured category</span>
-            <strong>{isAuthenticated ? (isInsightsLoading ? 'Loading...' : insights?.featuredCategory) : 'Login required'}</strong>
-          </article>
-          <article className="summary-card">
-            <span>Customer</span>
-            <strong>{auth.user?.name ?? 'Guest user'}</strong>
-          </article>
-          <article className="summary-card">
-            <span>Order total</span>
-            <strong>{isAuthenticated ? (isCartLoading ? 'Loading...' : `Rs. ${total}`) : 'Login required'}</strong>
-          </article>
-        </div>
-
-        <nav className="storefront-nav" aria-label="Storefront pages">
-          {visibleNavItems.map((item) => (
-            <button
-              key={item.path}
-              type="button"
-              className={item.path === currentRoute ? 'nav-link active' : 'nav-link'}
-              onClick={() => navigate(item.path)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </nav>
-
-        <div className="hero-actions">
-          {isAuthenticated ? (
-            <>
-              <button
-                type="button"
-                className="cart-toggle-button"
-                onClick={() => setIsCartOpen((current) => !current)}
-              >
-                {isCartOpen ? 'Hide cart' : `Open cart (${totalItemCount})`}
-              </button>
-              <button
-                type="button"
-                className="logout-button"
-                onClick={() => {
-                  dispatch(clearAuthSession());
-                  navigate('/auth');
-                }}
-              >
-                Logout
-              </button>
-            </>
-          ) : null}
-        </div>
-      </header>
-
-      {currentRoute === '/auth' ? <AuthPage onLogin={handleLogin} onRegister={handleRegister} /> : null}
-
-      {isAuthenticated && currentRoute === '/' ? (
-        <HomePage
-          customerName={customer.name}
-          featuredCategory={insights?.featuredCategory}
-          heroMessage={insights?.heroMessage}
-          orderTotal={total}
-          isLoading={isInsightsLoading}
-          onGoToCatalog={() => navigate('/catalog')}
-        />
-      ) : null}
-
-      {isAuthenticated && currentRoute === '/catalog' ? (
-        <CatalogPage
-          products={filteredProducts}
-          isLoading={isProductsLoading}
-          selectedCategory={selectedCategory}
-          searchTerm={searchTerm}
-          categories={categories}
-          onCategoryChange={setSelectedCategory}
-          onSearchTermChange={setSearchTerm}
-          onAddToCart={handleAddToCart}
-        />
-      ) : null}
-
-      {isAuthenticated && currentRoute === '/offers' ? (
-        <OffersPage
-          offers={offers}
-          isLoading={isOffersLoading}
-          activeCouponCode={appliedCouponCode}
-          onApplyCoupon={(couponCode) => dispatch(applyCoupon(couponCode))}
-        />
-      ) : null}
-
-      {isAuthenticated && currentRoute === '/checkout' ? (
-        <CheckoutPage
-          itemCount={totalItemCount}
-          subtotal={subtotal}
-          discount={discount}
-          shipping={shipping}
-          tax={tax}
-          total={total}
-          freeShippingThreshold={insights?.freeShippingThreshold}
-          shippingEta={insights?.shippingEta}
-          onOpenCart={() => setIsCartOpen(true)}
-          customerCard={customerCard}
-        />
-      ) : null}
-
-      {isAuthenticated && currentRoute === '/account' ? (
-        <AccountPage customerCard={customerCard} orders={myOrders} isOrdersLoading={isOrdersLoading} />
-      ) : null}
-
-      {isAuthenticated ? (
-        <button
-          type="button"
-          className="cart-fab"
-          onClick={() => setIsCartOpen((current) => !current)}
+    <Box sx={{ width: '100%', minHeight: '100vh', backgroundColor: 'background.default' }}>
+      <Paper
+        variant="outlined"
+        sx={{
+          width: '100%',
+          minHeight: '100vh',
+          borderRadius: 0,
+          overflow: 'visible',
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: '280px minmax(0, 1fr)' },
+          bgcolor: 'background.paper',
+        }}
+      >
+        <Box
+          sx={{
+            display: { xs: 'none', md: 'flex' },
+            flexDirection: 'column',
+            borderRight: `1px solid ${theme.palette.divider}`,
+            position: 'sticky',
+            top: 0,
+            maxHeight: '100vh',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+          }}
         >
-          {isCartOpen ? 'Close cart' : `Cart${totalItemCount > 0 ? ` (${totalItemCount})` : ''}`}
-        </button>
-      ) : null}
+          {sidebarNavigation}
+        </Box>
+
+        <Box sx={{ minWidth: 0, display: 'grid', gridTemplateRows: '72px 1fr' }}>
+          <Box
+            sx={{
+              px: { xs: 1.2, md: 2 },
+              borderBottom: `1px solid ${theme.palette.divider}`,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.2,
+              height: 72,
+              flexShrink: 0,
+            }}
+          >
+            <IconButton
+              onClick={() => setIsMobileNavOpen(true)}
+              sx={{ display: { xs: 'inline-flex', md: 'none' } }}
+            >
+              Menu
+            </IconButton>
+            <Typography sx={{ fontWeight: 700 }}>{currentNavLabel}</Typography>
+            <Stack direction="row" spacing={1} sx={{ ml: 'auto' }}>
+              <Button variant="outlined" onClick={toggleMode} sx={{ borderRadius: 1.2 }}>
+                {mode === 'light' ? 'Dark' : 'Light'}
+              </Button>
+              {isAuthenticated ? (
+                <>
+                  <Button variant="outlined" onClick={() => setIsCartOpen((open) => !open)} sx={{ borderRadius: 1.2 }}>
+                    Cart ({totalItemCount})
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    onClick={() => {
+                      dispatch(clearAuthSession());
+                      navigate('/auth');
+                    }}
+                    sx={{ borderRadius: 1.2 }}
+                  >
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <Button variant="contained" onClick={() => onNavigate('/auth')} sx={{ borderRadius: 1.2 }}>
+                  Sign in
+                </Button>
+              )}
+            </Stack>
+          </Box>
+
+          <Box sx={{ p: { xs: 1.2, md: 2.2 }, overflowY: 'auto', overflowX: 'hidden' }}>
+            <header className="hero-banner">
+              <div>
+                <p className="eyebrow">NovaStore Commerce</p>
+                <h1>Multi-page ecommerce storefront</h1>
+                <p className="hero-copy">
+                  Auth-enabled storefront with Node + Express + MongoDB backend APIs.
+                </p>
+              </div>
+
+              {isAuthenticated && (isInsightsLoading || isCartLoading) ? (
+                <StatCardsSkeleton />
+              ) : (
+                <div className="hero-stats">
+                  <article className="summary-card">
+                    <span>Featured category</span>
+                    <strong>{isAuthenticated ? insights?.featuredCategory : 'Login required'}</strong>
+                  </article>
+                  <article className="summary-card">
+                    <span>Customer</span>
+                    <strong>{auth.user?.name ?? 'Guest user'}</strong>
+                  </article>
+                  <article className="summary-card">
+                    <span>Order total</span>
+                    <strong>{isAuthenticated ? `Rs. ${total}` : 'Login required'}</strong>
+                  </article>
+                </div>
+              )}
+            </header>
+
+            {currentRoute === '/auth' ? <AuthPage onLogin={handleLogin} onRegister={handleRegister} /> : null}
+
+            {isAuthenticated && currentRoute === '/' ? (
+              <HomePage
+                customerName={customer.name}
+                featuredCategory={insights?.featuredCategory}
+                heroMessage={insights?.heroMessage}
+                orderTotal={total}
+                isLoading={isInsightsLoading}
+                onGoToCatalog={() => navigate('/catalog')}
+              />
+            ) : null}
+
+            {isAuthenticated && currentRoute === '/catalog' ? (
+              <CatalogPage
+                products={filteredProducts}
+                isLoading={isProductsLoading}
+                selectedCategory={selectedCategory}
+                searchTerm={searchTerm}
+                categories={categories}
+                onCategoryChange={setSelectedCategory}
+                onSearchTermChange={setSearchTerm}
+                onAddToCart={handleAddToCart}
+              />
+            ) : null}
+
+            {isAuthenticated && currentRoute === '/offers' ? (
+              <OffersPage
+                offers={offers}
+                isLoading={isOffersLoading}
+                activeCouponCode={appliedCouponCode}
+                onApplyCoupon={(couponCode) => dispatch(applyCoupon(couponCode))}
+              />
+            ) : null}
+
+            {isAuthenticated && currentRoute === '/checkout' ? (
+              <CheckoutPage
+                itemCount={totalItemCount}
+                subtotal={subtotal}
+                discount={discount}
+                shipping={shipping}
+                tax={tax}
+                total={total}
+                freeShippingThreshold={insights?.freeShippingThreshold}
+                shippingEta={insights?.shippingEta}
+                onOpenCart={() => setIsCartOpen(true)}
+                customerCard={customerCard}
+              />
+            ) : null}
+
+            {isAuthenticated && currentRoute === '/account' ? (
+              <AccountPage customerCard={customerCard} orders={myOrders} isOrdersLoading={isOrdersLoading} />
+            ) : null}
+          </Box>
+        </Box>
+      </Paper>
+
+      <Drawer
+        open={isMobileNavOpen}
+        onClose={() => setIsMobileNavOpen(false)}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': { width: 280 },
+        }}
+      >
+        {sidebarNavigation}
+      </Drawer>
 
       {isAuthenticated ? (
         <Suspense fallback={null}>
@@ -371,6 +501,6 @@ export function StorefrontPage() {
           />
         </Suspense>
       ) : null}
-    </main>
+    </Box>
   );
 }

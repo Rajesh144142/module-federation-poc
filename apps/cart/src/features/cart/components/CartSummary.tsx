@@ -23,7 +23,15 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 
 export function CartSummary({ subtotal, discount, shipping, tax, total }: CartSummaryProps) {
   return (
-    <Paper variant="outlined" sx={{ p: 1.5 }}>
+    <Paper
+      variant="outlined"
+      sx={{
+        p: 1.5,
+        borderRadius: 2,
+        borderColor: '#d7e0ea',
+        backgroundColor: '#f8fafc',
+      }}
+    >
       <Box sx={{ display: 'grid', gap: 1.2 }}>
         <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
           Price details

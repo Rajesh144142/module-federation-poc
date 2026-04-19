@@ -1,4 +1,16 @@
 import { FormEvent, useState } from 'react';
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Paper,
+  Stack,
+  Tab,
+  Tabs,
+  TextField,
+  Typography,
+} from '@mui/material';
 
 interface AuthPageProps {
   onLogin: (input: { email: string; password: string }) => Promise<void>;
@@ -33,64 +45,75 @@ export function AuthPage({ onLogin, onRegister }: AuthPageProps) {
 
   return (
     <section className="page-stack">
-      <section className="panel auth-panel">
-        <p className="section-label">Authentication</p>
-        <h2>{mode === 'login' ? 'Sign in to continue' : 'Create your account'}</h2>
-        <p>Use simple auth to access storefront pages and protected cart APIs.</p>
+      <Paper variant="outlined" className="panel auth-panel" sx={{ p: { xs: 2.2, md: 3 } }}>
+        <Typography className="section-label">Authentication</Typography>
+        <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.5 }}>
+          {mode === 'login' ? 'Sign in to continue' : 'Create your account'}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Securely access your storefront, offers, and protected checkout flows.
+        </Typography>
 
-        <div className="auth-switch">
-          <button
-            type="button"
-            className={mode === 'login' ? 'nav-link active' : 'nav-link'}
-            onClick={() => setMode('login')}
-          >
-            Login
-          </button>
-          <button
-            type="button"
-            className={mode === 'register' ? 'nav-link active' : 'nav-link'}
-            onClick={() => setMode('register')}
-          >
-            Register
-          </button>
-        </div>
+        <Tabs
+          value={mode}
+          onChange={(_, value: 'login' | 'register') => setMode(value)}
+          sx={{ mb: 2 }}
+        >
+          <Tab label="Login" value="login" />
+          <Tab label="Register" value="register" />
+        </Tabs>
 
-        <form className="auth-form" onSubmit={submit}>
-          {mode === 'register' ? (
-            <label className="toolbar-field">
-              <span>Name</span>
-              <input value={name} onChange={(event) => setName(event.target.value)} required />
-            </label>
-          ) : null}
+        <Box component="form" onSubmit={submit}>
+          <Stack spacing={1.4}>
+            {mode === 'register' ? (
+              <TextField
+                label="Full name"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                required
+                fullWidth
+              />
+            ) : null}
 
-          <label className="toolbar-field">
-            <span>Email</span>
-            <input
+            <TextField
               type="email"
+              label="Email address"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               required
+              fullWidth
             />
-          </label>
 
-          <label className="toolbar-field">
-            <span>Password</span>
-            <input
+            <TextField
               type="password"
+              label="Password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               required
-              minLength={6}
+              fullWidth
+              slotProps={{ htmlInput: { minLength: 6 } }}
             />
-          </label>
 
-          {errorMessage ? <p className="auth-error">{errorMessage}</p> : null}
+            {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
 
-          <button type="submit" className="primary-inline" disabled={isSubmitting}>
-            {isSubmitting ? 'Please wait...' : mode === 'login' ? 'Login' : 'Create account'}
-          </button>
-        </form>
-      </section>
+            <Button type="submit" variant="contained" disabled={isSubmitting} sx={{ mt: 0.4 }}>
+              {isSubmitting ? (
+                <>
+                  <CircularProgress
+                    size={16}
+                    sx={{ color: 'inherit', mr: 1 }}
+                  />
+                  Please wait...
+                </>
+              ) : mode === 'login' ? (
+                'Login'
+              ) : (
+                'Create account'
+              )}
+            </Button>
+          </Stack>
+        </Box>
+      </Paper>
     </section>
   );
 }

@@ -9,7 +9,15 @@ interface CartLineItemProps {
 
 export function CartLineItem({ item, onRemoveItem, onUpdateQuantity }: CartLineItemProps) {
   return (
-    <Paper variant="outlined" sx={{ p: 1.5 }}>
+    <Paper
+      variant="outlined"
+      sx={{
+        p: 1.5,
+        borderRadius: 2,
+        borderColor: '#d7e0ea',
+        backgroundColor: '#f8fafc',
+      }}
+    >
       <Box sx={{ display: 'grid', gap: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2 }}>
           <Box>
@@ -31,6 +39,13 @@ export function CartLineItem({ item, onRemoveItem, onUpdateQuantity }: CartLineI
               size="small"
               aria-label="Decrease quantity"
               onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+              sx={{
+                border: '1px solid #d7e0ea',
+                color: '#174a78',
+                borderRadius: 999,
+                width: 28,
+                height: 28,
+              }}
             >
               -
             </IconButton>
@@ -41,6 +56,13 @@ export function CartLineItem({ item, onRemoveItem, onUpdateQuantity }: CartLineI
               size="small"
               aria-label="Increase quantity"
               onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+              sx={{
+                border: '1px solid #d7e0ea',
+                color: '#174a78',
+                borderRadius: 999,
+                width: 28,
+                height: 28,
+              }}
             >
               +
             </IconButton>
@@ -53,9 +75,10 @@ export function CartLineItem({ item, onRemoveItem, onUpdateQuantity }: CartLineI
             sx={{
               border: 'none',
               background: 'transparent',
-              color: 'primary.main',
+              color: '#174a78',
               cursor: 'pointer',
               fontSize: 13,
+              fontWeight: 700,
             }}
           >
             Remove

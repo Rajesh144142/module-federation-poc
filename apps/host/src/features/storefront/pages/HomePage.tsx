@@ -1,3 +1,6 @@
+import { Skeleton } from '@mui/material';
+import { StatCardsSkeleton } from '../../../shared/components/AppLoaders';
+
 interface HomePageProps {
   customerName: string;
   featuredCategory?: string;
@@ -54,20 +57,24 @@ export function HomePage({
         </article>
       </section>
 
-      <section className="home-kpis">
-        <article className="summary-card">
-          <span>Featured category</span>
-          <strong>{isLoading ? 'Loading...' : featuredCategory}</strong>
-        </article>
-        <article className="summary-card">
-          <span>Customer</span>
-          <strong>{customerName}</strong>
-        </article>
-        <article className="summary-card">
-          <span>Current order total</span>
-          <strong>Rs. {orderTotal}</strong>
-        </article>
-      </section>
+      {isLoading ? (
+        <StatCardsSkeleton />
+      ) : (
+        <section className="home-kpis">
+          <article className="summary-card">
+            <span>Featured category</span>
+            <strong>{featuredCategory ?? 'Not available'}</strong>
+          </article>
+          <article className="summary-card">
+            <span>Customer</span>
+            <strong>{customerName || <Skeleton width={100} />}</strong>
+          </article>
+          <article className="summary-card">
+            <span>Current order total</span>
+            <strong>Rs. {orderTotal}</strong>
+          </article>
+        </section>
+      )}
     </section>
   );
 }

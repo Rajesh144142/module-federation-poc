@@ -1,4 +1,5 @@
 import type { Product } from '../../../shared/types/store';
+import { GridSkeleton } from '../../../shared/components/AppLoaders';
 import { CatalogToolbar } from './catalog/CatalogToolbar';
 import { ProductCard } from './catalog/ProductCard';
 
@@ -41,7 +42,9 @@ export function ProductCatalog({
         onSearchTermChange={onSearchTermChange}
       />
 
-      {products.length === 0 && !isLoading ? (
+      {isLoading ? (
+        <GridSkeleton />
+      ) : products.length === 0 ? (
         <div className="empty-results">No products match this filter.</div>
       ) : (
         <div className="product-grid">

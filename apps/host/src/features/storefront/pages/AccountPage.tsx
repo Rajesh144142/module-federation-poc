@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import type { OrderSummary } from '../../../shared/types/store';
+import { ListSkeleton } from '../../../shared/components/AppLoaders';
 
 interface AccountPageProps {
   customerCard: ReactNode;
@@ -20,7 +21,7 @@ export function AccountPage({ customerCard, orders, isOrdersLoading }: AccountPa
         <p className="section-label">Orders</p>
         <h2>Recent orders</h2>
         {isOrdersLoading ? (
-          <p>Loading orders...</p>
+          <ListSkeleton />
         ) : orders.length === 0 ? (
           <p>No orders yet.</p>
         ) : (

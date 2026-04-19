@@ -22,7 +22,14 @@ const previewCustomer: Customer = {
 
 export function App() {
   return (
-    <main style={{ minHeight: '100vh', padding: '32px', background: '#f5f0e7' }}>
+    <main
+      style={{
+        minHeight: '100vh',
+        padding: '32px',
+        background:
+          'radial-gradient(circle at 10% 0%, rgba(23, 74, 120, 0.14), transparent 30%), #f3f5f8',
+      }}
+    >
       <CustomerPanel customer={previewCustomer} />
     </main>
   );

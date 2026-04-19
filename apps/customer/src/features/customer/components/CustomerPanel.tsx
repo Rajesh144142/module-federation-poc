@@ -7,6 +7,7 @@ import '../styles/customer.css';
 
 function CustomerPanel({ customer, authToken, apiBaseUrl }: CustomerPanelProps) {
   const [remoteCustomer, setRemoteCustomer] = useState(customer ?? null);
+  const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
     setRemoteCustomer(customer ?? null);
@@ -18,6 +19,7 @@ function CustomerPanel({ customer, authToken, apiBaseUrl }: CustomerPanelProps) 
     }
 
     let active = true;
+    setIsFetching(true);
     getCustomerProfile(authToken, apiBaseUrl)
       .then((profile) => {
         if (active) {
@@ -26,12 +28,30 @@ function CustomerPanel({ customer, authToken, apiBaseUrl }: CustomerPanelProps) 
       })
       .catch(() => {
         // Keep existing fallback customer data if remote fetch fails.
+      })
+      .finally(() => {
+        if (active) {
+          setIsFetching(false);
+        }
       });
 
     return () => {
       active = false;
     };
   }, [authToken, apiBaseUrl]);
+
+  if (isFetching && !remoteCustomer) {
+    return (
+      <article className="customer-card">
+        <p className="customer-label">Customer module</p>
+        <div className="customer-skeleton customer-skeleton-title" />
+        <div className="customer-skeleton customer-skeleton-line" />
+        <div className="customer-skeleton customer-skeleton-line short" />
+        <div className="customer-skeleton customer-skeleton-card" />
+        <div className="customer-skeleton customer-skeleton-card" />
+      </article>
+    );
+  }
 
   if (!remoteCustomer) {
     return (

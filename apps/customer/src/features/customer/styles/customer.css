@@ -1,19 +1,20 @@
 .customer-card {
   padding: 24px;
+  color: var(--color-text, #0f2740);
 }
 
 .customer-label {
   margin: 0 0 8px;
-  color: #7a551d;
+  color: var(--color-accent, #c8862a);
   font-size: 0.8rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
 .customer-tier {
-  color: #49637c;
-  font-weight: 600;
+  color: var(--color-text-muted, #5a7289);
+  font-weight: 700;
 }
 
 .customer-meta {
@@ -26,8 +27,9 @@
 .address-card,
 .account-stats div {
   padding: 14px;
-  border-radius: 14px;
-  background: #f7fafc;
+  border-radius: 16px;
+  border: 1px solid var(--color-border, #d7e0ea);
+  background: var(--color-surface-soft, #f8fafc);
 }
 
 .customer-meta span,
@@ -35,14 +37,14 @@
 .account-stats span {
   display: block;
   margin-bottom: 6px;
-  color: #6a8196;
+  color: var(--color-text-muted, #5a7289);
   font-size: 0.85rem;
 }
 
 .customer-meta strong,
 .address-card strong,
 .account-stats strong {
-  color: #173454;
+  color: var(--color-text, #0f2740);
 }
 
 .address-card {
@@ -51,11 +53,49 @@
 
 .address-card p {
   margin: 6px 0 0;
-  color: #58718a;
+  color: var(--color-text-muted, #5a7289);
 }
 
 .account-stats {
   margin-top: 14px;
   display: grid;
   gap: 12px;
+}
+
+.customer-skeleton {
+  border-radius: 10px;
+  background: linear-gradient(90deg, #e9eff5 20%, #f4f8fc 40%, #e9eff5 60%);
+  background-size: 220% 100%;
+  animation: customer-shimmer 1.2s ease-in-out infinite;
+}
+
+.customer-skeleton-title {
+  height: 28px;
+  width: 64%;
+  margin-bottom: 10px;
+}
+
+.customer-skeleton-line {
+  height: 16px;
+  width: 88%;
+  margin-bottom: 8px;
+}
+
+.customer-skeleton-line.short {
+  width: 54%;
+  margin-bottom: 14px;
+}
+
+.customer-skeleton-card {
+  height: 72px;
+  margin-top: 8px;
+}
+
+@keyframes customer-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
 }

@@ -6,6 +6,7 @@ import {
   Divider,
   Drawer,
   IconButton,
+  Skeleton,
   Snackbar,
   Typography,
   useMediaQuery,
@@ -104,11 +105,15 @@ function MiniCart({
           paper: {
             sx: {
               width: { xs: '100%', md: 430 },
-              mt: { xs: 0, md: 2 },
-              mr: { xs: 0, md: 2 },
-              height: { xs: '100%', md: 'calc(100% - 16px)' },
-              borderRadius: { xs: 0, md: 2.5 },
-              p: 2,
+              height: '100%',
+              mr: { xs: 0, md: 0 },
+              borderRadius: { xs: 0, md: 0 },
+              p: 2.5,
+              border: '1px solid #d7e0ea',
+              backgroundColor: '#ffffff',
+              position: 'fixed',
+              top: 0,
+              right: 0,
             },
           },
         }}
@@ -121,7 +126,11 @@ function MiniCart({
               </Typography>
               <Typography variant="h6">{customerName}&apos;s cart</Typography>
             </Box>
-            <IconButton onClick={onClose} aria-label="Close cart">
+            <IconButton
+              onClick={onClose}
+              aria-label="Close cart"
+              sx={{ border: '1px solid #d7e0ea', borderRadius: 999, width: 32, height: 32 }}
+            >
               x
             </IconButton>
           </Box>
@@ -152,7 +161,23 @@ function MiniCart({
           <Divider />
 
           {effectiveLoading ? (
-            <Alert severity="info">Loading selected products...</Alert>
+            <Box sx={{ display: 'grid', gap: 1.2 }}>
+              {Array.from({ length: 3 }, (_, index) => (
+                <Box
+                  key={`mini-cart-skeleton-${index}`}
+                  sx={{
+                    border: '1px solid #d7e0ea',
+                    borderRadius: 2,
+                    p: 1.2,
+                    backgroundColor: '#f8fafc',
+                  }}
+                >
+                  <Skeleton width="50%" />
+                  <Skeleton width="34%" />
+                  <Skeleton width="70%" />
+                </Box>
+              ))}
+            </Box>
           ) : effectiveItems.length === 0 ? (
             <Alert severity="warning">Your cart is empty. Add products from the catalog.</Alert>
           ) : (
@@ -177,13 +202,27 @@ function MiniCart({
           )}
 
           <Box sx={{ display: 'grid', gap: 1, mt: 'auto' }}>
-            <Button variant="outlined" onClick={onContinueShopping}>
+            <Button
+              variant="outlined"
+              onClick={onContinueShopping}
+              sx={{
+                borderColor: '#c3d3e2',
+                color: '#174a78',
+                borderRadius: '999px',
+                '&:hover': { borderColor: '#9fb6cc', backgroundColor: '#f4f8fc' },
+              }}
+            >
               Continue shopping
             </Button>
             <Button
               variant="contained"
               disabled={effectiveItems.length === 0 || effectiveLoading}
               onClick={() => setNotice('Checkout flow will be connected next.')}
+              sx={{
+                backgroundColor: '#174a78',
+                borderRadius: '999px',
+                '&:hover': { backgroundColor: '#123a60' },
+              }}
             >
               Proceed to checkout
             </Button>

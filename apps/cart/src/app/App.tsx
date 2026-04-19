@@ -8,9 +8,12 @@ const previewItems = [
 ];
 
 const theme = createTheme({
+  typography: {
+    fontFamily: "Manrope, 'Segoe UI', Tahoma, sans-serif",
+  },
   palette: {
-    primary: { main: '#14304d' },
-    background: { default: '#f3f8ff' },
+    primary: { main: '#174a78' },
+    background: { default: '#f3f5f8' },
   },
 });
 
