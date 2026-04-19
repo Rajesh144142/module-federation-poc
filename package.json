@@ -1,0 +1,22 @@
+{
+  "name": "microfrontend-poc",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "scripts": {
+    "dev:all": "concurrently \"npm run dev:server\" \"npm run dev:customer\" \"npm run dev:cart\" \"npm run dev:host\"",
+    "dev:server": "npm --workspace server run dev",
+    "dev:host": "npm --workspace host run dev",
+    "dev:customer": "npm --workspace customer run build && npm --workspace customer run preview",
+    "dev:cart": "npm --workspace cart run build && npm --workspace cart run preview",
+    "build": "npm run build --workspaces",
+    "preview:host": "npm --workspace host run preview",
+    "preview:customer": "npm --workspace customer run preview",
+    "preview:cart": "npm --workspace cart run preview"
+  }
+}

@@ -1,0 +1,61 @@
+.customer-card {
+  padding: 24px;
+}
+
+.customer-label {
+  margin: 0 0 8px;
+  color: #7a551d;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.customer-tier {
+  color: #49637c;
+  font-weight: 600;
+}
+
+.customer-meta {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.customer-meta div,
+.address-card,
+.account-stats div {
+  padding: 14px;
+  border-radius: 14px;
+  background: #f7fafc;
+}
+
+.customer-meta span,
+.address-card span,
+.account-stats span {
+  display: block;
+  margin-bottom: 6px;
+  color: #6a8196;
+  font-size: 0.85rem;
+}
+
+.customer-meta strong,
+.address-card strong,
+.account-stats strong {
+  color: #173454;
+}
+
+.address-card {
+  margin-top: 14px;
+}
+
+.address-card p {
+  margin: 6px 0 0;
+  color: #58718a;
+}
+
+.account-stats {
+  margin-top: 14px;
+  display: grid;
+  gap: 12px;
+}
